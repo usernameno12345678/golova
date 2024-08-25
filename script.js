@@ -1,6 +1,6 @@
 // Basic setup for Three.js
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000); // Уменьшенное поле зрения
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true для прозрачного фона
 renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('model-container').appendChild(renderer.domElement);
@@ -28,7 +28,7 @@ const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
 directionalLight.position.set(0, 1, 1).normalize();
 scene.add(directionalLight);
 
-camera.position.z = 1; // Уменьшаем значение для приближения камеры
+camera.position.z = 4; // Уменьшаем значение для приближения камеры
 
 function animate() {
     requestAnimationFrame(animate);
@@ -108,9 +108,9 @@ window.addEventListener('resize', () => {
 function updateModelScale() {
     if (model) {
         if (window.innerWidth <= 768) {
-            model.scale.set(2, 2, 2); // Уменьшаем масштаб модели для мобильных устройств
+            model.scale.set(4, 4, 4); // Увеличиваем масштаб модели для мобильных устройств
         } else {
-            model.scale.set(2.9, 2.9, 2.9); // Увеличиваем масштаб модели для десктопов
+            model.scale.set(5, 5, 5); // Увеличиваем масштаб модели для десктопов
         }
         console.log("Model scale updated");
     } else {
