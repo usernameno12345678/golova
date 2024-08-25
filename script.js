@@ -34,13 +34,17 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Rotate model based on mouse movement
-document.addEventListener('mousemove', (event) => {
-    const x = (event.clientX / window.innerWidth) * 2 - 1;
-    const y = (event.clientY / window.innerHeight) * 2 - 1;
-    scene.rotation.y = x * 0.2; // Уменьшаем коэффициент для менее активного поворота
-    scene.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
-});
+
+
+// Rotate model based on device orientation
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (event) => {
+        const x = event.gamma ? event.gamma / 90 : 0; // Y-axis
+        const y = event.beta ? event.beta / 180 : 0; // X-axis
+        model.rotation.y = x * 0.2; // Уменьшаем коэффициент для менее активного поворота
+        model.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
+    });
+}
 
 // Handle window resize
 window.addEventListener('resize', () => {
@@ -74,14 +78,3 @@ setVh();
 
 // Update the CSS variable on resize
 window.addEventListener('resize', setVh);
-
-// Rotate model based on device orientation
-if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', (event) => {
-        const alpha = event.alpha ? THREE.Math.degToRad(event.alpha) : 0; // Z-axis
-        const beta = event.beta ? THREE.Math.degToRad(event.beta) : 0; // X-axis
-        const gamma = event.gamma ? THREE.Math.degToRad(event.gamma) : 0; // Y-axis
-
-        model.rotation.set(beta, gamma, alpha);
-    });
-}
