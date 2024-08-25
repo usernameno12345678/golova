@@ -35,53 +35,62 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-// Rotate model based on mouse movement
+// Variables for touch handling
+let isTouching = false;
+let lastTouchX = 0;
+let lastTouchY = 0;
+let targetRotationX = 0;
+let targetRotationY = 0;
+const rotationSpeed = 0.002; // Уменьшенная скорость вращения для мобильных устройств
+const smoothFactor = 0.1; // Коэффициент плавности
+
+// Rotate model based on mouse movement (desktop)
 document.addEventListener('mousemove', (event) => {
     const x = (event.clientX / window.innerWidth) * 2 - 1;
     const y = (event.clientY / window.innerHeight) * 2 - 1;
-    scene.rotation.y = x * 0.2; // Уменьшаем коэффициент для менее активного поворота
-    scene.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
+    scene.rotation.y = x * 0.2; // Коэффициент для активного поворота на компьютере
+    scene.rotation.x = y * 0.2; // Коэффициент для активного поворота на компьютере
     console.log(`Mouse move: x=${x}, y=${y}`);
 });
 
-// Rotate model based on device orientation
-if (window.DeviceOrientationEvent) {
-    console.log("DeviceOrientationEvent supported");
+// Rotate model based on touch movement (mobile)
+document.addEventListener('touchstart', (event) => {
+    isTouching = true;
+    lastTouchX = event.touches[0].clientX;
+    lastTouchY = event.touches[0].clientY;
+});
 
-    const requestPermissionButton = document.getElementById('requestPermissionButton');
-    requestPermissionButton.addEventListener('click', () => {
-        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-            DeviceOrientationEvent.requestPermission()
-                .then(permissionState => {
-                    if (permissionState === 'granted') {
-                        window.addEventListener('deviceorientation', handleOrientation);
-                        requestPermissionButton.style.display = 'none'; // Скрываем кнопку после получения разрешения
-                    } else {
-                        console.log("Permission to access device orientation was denied");
-                    }
-                })
-                .catch(console.error);
-        } else {
-            // Для других устройств
-            window.addEventListener('deviceorientation', handleOrientation);
-            requestPermissionButton.style.display = 'none'; // Скрываем кнопку для устройств, не требующих разрешения
-        }
-    });
-} else {
-    console.log("DeviceOrientationEvent not supported");
-}
-
-function handleOrientation(event) {
-    console.log("Device orientation event fired");
-    if (model) {
-        const gamma = event.gamma ? event.gamma : 0; // Y-axis
-        const beta = event.beta ? event.beta : 0; // X-axis
-        model.rotation.y = THREE.Math.degToRad(gamma) * 0.2; // Уменьшаем коэффициент для менее активного поворота
-        model.rotation.x = THREE.Math.degToRad(beta) * 0.2; // Уменьшаем коэффициент для менее активного поворота
-        console.log(`Device orientation: gamma=${gamma}, beta=${beta}`);
-    } else {
-        console.log("Model not loaded yet");
+document.addEventListener('touchmove', (event) => {
+    if (isTouching) {
+        const touchX = event.touches[0].clientX;
+        const touchY = event.touches[0].clientY;
+        const deltaX = touchX - lastTouchX;
+        const deltaY = touchY - lastTouchY;
+        targetRotationY += deltaX * rotationSpeed; // Уменьшенная скорость вращения для мобильных устройств
+        targetRotationX += deltaY * rotationSpeed; // Уменьшенная скорость вращения для мобильных устройств
+        lastTouchX = touchX;
+        lastTouchY = touchY;
     }
+});
+
+document.addEventListener('touchend', (event) => {
+    isTouching = false;
+    if (event.changedTouches.length > 0) {
+        const touchX = event.changedTouches[0].clientX;
+        const touchY = event.changedTouches[0].clientY;
+        targetRotationY = (touchX / window.innerWidth - 0.5) * Math.PI * 0.12; // Уменьшенный коэффициент для менее активного поворота на мобильных устройствах
+        targetRotationX = (touchY / window.innerHeight - 0.5) * Math.PI * 0.12; // Уменьшенный коэффициент для менее активного поворота на мобильных устройствах
+    }
+});
+
+// Smooth rotation animation
+function animate() {
+    requestAnimationFrame(animate);
+    if (model) {
+        model.rotation.y += (targetRotationY - model.rotation.y) * smoothFactor; // Плавная анимация поворота по Y
+        model.rotation.x += (targetRotationX - model.rotation.x) * smoothFactor; // Плавная анимация поворота по X
+    }
+    renderer.render(scene, camera);
 }
 
 // Handle window resize
