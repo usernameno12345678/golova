@@ -48,21 +48,25 @@ document.addEventListener('mousemove', (event) => {
 if (window.DeviceOrientationEvent) {
     console.log("DeviceOrientationEvent supported");
 
-    // Запрос разрешения для iOS 13+ устройств
-    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
-        DeviceOrientationEvent.requestPermission()
-            .then(permissionState => {
-                if (permissionState === 'granted') {
-                    window.addEventListener('deviceorientation', handleOrientation);
-                } else {
-                    console.log("Permission to access device orientation was denied");
-                }
-            })
-            .catch(console.error);
-    } else {
-        // Для других устройств
-        window.addEventListener('deviceorientation', handleOrientation);
-    }
+    const requestPermissionButton = document.getElementById('requestPermissionButton');
+    requestPermissionButton.addEventListener('click', () => {
+        if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+            DeviceOrientationEvent.requestPermission()
+                .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        window.addEventListener('deviceorientation', handleOrientation);
+                        requestPermissionButton.style.display = 'none'; // Скрываем кнопку после получения разрешения
+                    } else {
+                        console.log("Permission to access device orientation was denied");
+                    }
+                })
+                .catch(console.error);
+        } else {
+            // Для других устройств
+            window.addEventListener('deviceorientation', handleOrientation);
+            requestPermissionButton.style.display = 'none'; // Скрываем кнопку для устройств, не требующих разрешения
+        }
+    });
 } else {
     console.log("DeviceOrientationEvent not supported");
 }
