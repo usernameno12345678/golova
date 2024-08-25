@@ -15,6 +15,7 @@ loader.load('golova.glb', function (gltf) {
     model.position.set(0, 0, 0); // Устанавливаем модель в центр сцены
     scene.add(model);
     animate();
+    console.log("Model loaded");
 }, undefined, function (error) {
     console.error(error);
 });
@@ -34,16 +35,49 @@ function animate() {
     renderer.render(scene, camera);
 }
 
-
+// Rotate model based on mouse movement
+document.addEventListener('mousemove', (event) => {
+    const x = (event.clientX / window.innerWidth) * 2 - 1;
+    const y = (event.clientY / window.innerHeight) * 2 - 1;
+    scene.rotation.y = x * 0.2; // Уменьшаем коэффициент для менее активного поворота
+    scene.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
+    console.log(`Mouse move: x=${x}, y=${y}`);
+});
 
 // Rotate model based on device orientation
 if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', (event) => {
-        const x = event.gamma ? event.gamma / 90 : 0; // Y-axis
-        const y = event.beta ? event.beta / 180 : 0; // X-axis
-        model.rotation.y = x * 0.2; // Уменьшаем коэффициент для менее активного поворота
-        model.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
-    });
+    console.log("DeviceOrientationEvent supported");
+
+    // Запрос разрешения для iOS 13+ устройств
+    if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+        DeviceOrientationEvent.requestPermission()
+            .then(permissionState => {
+                if (permissionState === 'granted') {
+                    window.addEventListener('deviceorientation', handleOrientation);
+                } else {
+                    console.log("Permission to access device orientation was denied");
+                }
+            })
+            .catch(console.error);
+    } else {
+        // Для других устройств
+        window.addEventListener('deviceorientation', handleOrientation);
+    }
+} else {
+    console.log("DeviceOrientationEvent not supported");
+}
+
+function handleOrientation(event) {
+    console.log("Device orientation event fired");
+    if (model) {
+        const gamma = event.gamma ? event.gamma : 0; // Y-axis
+        const beta = event.beta ? event.beta : 0; // X-axis
+        model.rotation.y = THREE.Math.degToRad(gamma) * 0.2; // Уменьшаем коэффициент для менее активного поворота
+        model.rotation.x = THREE.Math.degToRad(beta) * 0.2; // Уменьшаем коэффициент для менее активного поворота
+        console.log(`Device orientation: gamma=${gamma}, beta=${beta}`);
+    } else {
+        console.log("Model not loaded yet");
+    }
 }
 
 // Handle window resize
@@ -55,6 +89,7 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     updateModelScale(); // Обновляем масштаб модели при изменении размера окна
     setVh(); // Обновляем переменную vh при изменении размера окна
+    console.log("Window resized");
 });
 
 function updateModelScale() {
@@ -64,6 +99,9 @@ function updateModelScale() {
         } else {
             model.scale.set(2.9, 2.9, 2.9); // Увеличиваем масштаб модели для десктопов
         }
+        console.log("Model scale updated");
+    } else {
+        console.log("Model not loaded yet");
     }
 }
 
@@ -71,6 +109,7 @@ function updateModelScale() {
 function setVh() {
     let vh = window.innerHeight * 0.01;
     document.documentElement.style.setProperty('--vh', `${vh}px`);
+    console.log("Viewport height set");
 }
 
 // Initial setting of the CSS variable
