@@ -42,18 +42,6 @@ document.addEventListener('mousemove', (event) => {
     scene.rotation.x = y * 0.2; // Уменьшаем коэффициент для менее активного поворота
 });
 
-// Rotate model based on device orientation
-if (window.DeviceOrientationEvent) {
-    window.addEventListener('deviceorientation', (event) => {
-        if (model) {
-            const gamma = event.gamma ? event.gamma : 0; // Y-axis
-            const beta = event.beta ? event.beta : 0; // X-axis
-            model.rotation.y = THREE.Math.degToRad(gamma) * 0.2; // Уменьшаем коэффициент для менее активного поворота
-            model.rotation.x = THREE.Math.degToRad(beta) * 0.2; // Уменьшаем коэффициент для менее активного поворота
-        }
-    });
-}
-
 // Handle window resize
 window.addEventListener('resize', () => {
     const width = window.innerWidth;
@@ -86,3 +74,14 @@ setVh();
 
 // Update the CSS variable on resize
 window.addEventListener('resize', setVh);
+
+// Rotate model based on device orientation
+if (window.DeviceOrientationEvent) {
+    window.addEventListener('deviceorientation', (event) => {
+        const alpha = event.alpha ? THREE.Math.degToRad(event.alpha) : 0; // Z-axis
+        const beta = event.beta ? THREE.Math.degToRad(event.beta) : 0; // X-axis
+        const gamma = event.gamma ? THREE.Math.degToRad(event.gamma) : 0; // Y-axis
+
+        model.rotation.set(beta, gamma, alpha);
+    });
+}
