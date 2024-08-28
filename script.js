@@ -6,6 +6,7 @@ renderer.setSize(window.innerWidth, window.innerHeight);
 document.getElementById('model-container').appendChild(renderer.domElement);
 
 let model; // Переменная для хранения модели
+let isModelMinimized = false; // Флаг для отслеживания состояния модели
 
 // Load the 3D model
 const loader = new THREE.GLTFLoader();
@@ -16,6 +17,10 @@ loader.load('golova.glb', function (gltf) {
     scene.add(model);
     animate();
     console.log("Model loaded");
+
+    // Добавляем обработчик клика на контейнер модели
+    document.getElementById('model-container').addEventListener('click', onModelClick);
+    document.getElementById('model-container').addEventListener('touchend', onModelTouch);
 }, undefined, function (error) {
     console.error(error);
 });
@@ -32,6 +37,10 @@ camera.position.z = 4; // Уменьшаем значение для прибл�
 
 function animate() {
     requestAnimationFrame(animate);
+    if (model) {
+        model.rotation.y += (targetRotationY - model.rotation.y) * smoothFactor; // Плавная анимация поворота по Y
+        model.rotation.x += (targetRotationX - model.rotation.x) * smoothFactor; // Плавная анимация поворота по X
+    }
     renderer.render(scene, camera);
 }
 
@@ -48,8 +57,14 @@ const smoothFactor = 0.1; // Коэффициент плавности
 document.addEventListener('mousemove', (event) => {
     const x = (event.clientX / window.innerWidth) * 2 - 1;
     const y = (event.clientY / window.innerHeight) * 2 - 1;
-    scene.rotation.y = x * 0.2; // Коэффициент для активного поворота на компьютере
-    scene.rotation.x = y * 0.2; // Коэффициент для активного поворота на компьютере
+    if (isModelMinimized) {
+        const adjustedY = window.innerWidth <= 768 ? y + 0.5 : y + -1; // Условие для мобильной и десктопной версий
+        targetRotationY = x * 0.2; // Коэффициент для активного поворота на компьютере
+        targetRotationX = adjustedY * 0.2; // Коэффициент для активного поворота на компьютере
+    } else {
+        targetRotationY = x * 0.2; // Коэффициент для активного поворота на компьютере
+        targetRotationX = y * 0.2; // Коэффициент для активного поворота на компьютере
+    }
     console.log(`Mouse move: x=${x}, y=${y}`);
 });
 
@@ -102,6 +117,15 @@ window.addEventListener('resize', () => {
     camera.updateProjectionMatrix();
     updateModelScale(); // Обновляем масштаб модели при изменении размера окна
     setVh(); // Обновляем переменную vh при изменении размера окна
+    if (isModelMinimized) {
+        if (window.innerWidth <= 768) {
+            gsap.to(model.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0 });
+            gsap.to(model.position, { x: 0, y: 0.45, z: 0, duration: 0 }); // Поднимаем модель вверх для мобильных устройств
+        } else {
+            gsap.to(model.scale, { x: 1.1, y: 1.1, z: 1.1, duration: 0 });
+            gsap.to(model.position, { x: 0, y: -1, z: 0, duration: 0 }); // Опускаем модель вниз для десктопов
+        }
+    }
     console.log("Window resized");
 });
 
@@ -130,3 +154,101 @@ setVh();
 
 // Update the CSS variable on resize
 window.addEventListener('resize', setVh);
+
+// Function to handle model click
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onDocumentMouseDown(event) {
+    event.preventDefault();
+
+    mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
+    mouse.y = -(event.clientY / window.innerHeight) * 2 + 1;
+
+    raycaster.setFromCamera(mouse, camera);
+
+    const intersects = raycaster.intersectObjects(scene.children, true);
+
+    console.log('Intersects:', intersects); // Debug log
+
+    if (intersects.length > 0) {
+        const firstIntersectedObject = intersects[0].object;
+        console.log('First intersected object:', firstIntersectedObject); // Debug log
+        // Упростим проверку, чтобы убедиться, что клик по модели обрабатывается
+        if (firstIntersectedObject.name === 'Data_GEO_ellie_head_002') {
+            // Обработка клика по модели
+            toggleModelState();
+            return; // Прекращаем дальнейшую обработку события
+        }
+    }
+}
+
+document.addEventListener('mousedown', onDocumentMouseDown, false);
+
+function toggleModelState() {
+    const textContainer = document.getElementById('text-container');
+    const slider = document.getElementById('slider');
+
+    if (isModelMinimized) {
+        // Возвращаем модель в исходное состояние
+        if (window.innerWidth <= 768) {
+            gsap.to(model.scale, { x: 4, y: 4, z: 4, duration: 0.6 }); // Возвращаем масштаб для мобильных устройств
+            gsap.to(model.position, { x: 0, y: 0, z: 0, duration: 0.6 }); // Возвращаем позицию для мобильных устройств
+            gsap.to(model.rotation, { x: 0, duration: 0.6 }); // Возвращаем поворот модели
+        } else {
+            gsap.to(model.scale, { x: 5, y: 5, z: 5, duration: 0.6 }); // Возвращаем масштаб для десктопов
+            gsap.to(model.position, { x: 0, y: 0, z: 0, duration: 0.6 }); // Возвращаем позицию для десктопов
+            gsap.to(model.rotation, { x: 0, duration: 0.6 }); // Возвращаем поворот модели
+        }
+        textContainer.classList.remove('hidden');
+        slider.classList.add('hidden');
+        isModelMinimized = false;
+    } else {
+        // Уменьшаем и перемещаем модель вниз экрана для десктопов, вверх для мобильных устройств
+        if (window.innerWidth <= 768) {
+            gsap.to(model.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.6 }); // Делаем модель еще меньше
+            gsap.to(model.position, { x: 0, y: 0.45, z: 0, duration: 0.6 }); // Поднимаем модель вверх для мобильных устройств
+        } else {
+            gsap.to(model.scale, { x: 1.1, y: 1.1, z: 1.1, duration: 0.6 }); // Делаем модель еще меньше
+            gsap.to(model.position, { x: 0, y: -1, z: 0, duration: 0.6 }); // Опускаем модель вниз для десктопов
+        }
+        textContainer.classList.add('hidden');
+        slider.classList.remove('hidden');
+        isModelMinimized = true;
+    }
+    console.log(`Model minimized: ${isModelMinimized}`);
+}
+
+// Slider functionality
+const slider = document.getElementById('slider');
+const slides = slider.getElementsByClassName('slide');
+let currentSlide = 0;
+
+function showSlide(index) {
+    for (let i = 0; i < slides.length; i++) {
+        slides[i].classList.remove('active');
+    }
+    slides[index].classList.add('active');
+}
+
+showSlide(currentSlide);
+
+slider.addEventListener('click', function(event) {
+    const rect = slider.getBoundingClientRect();
+    const clickX = event.clientX - rect.left;
+
+    if (clickX < rect.width / 2) {
+        // Clicked on the left side, go to previous slide
+        currentSlide = (currentSlide === 0) ? slides.length - 1 : currentSlide - 1;
+    } else {
+        // Clicked on the right side, go to next slide
+        currentSlide = (currentSlide === slides.length - 1) ? 0 : currentSlide + 1;
+    }
+    showSlide(currentSlide);
+});
+
+// Добавляем обработчик клика на контейнер модели
+document.getElementById('model-container').addEventListener('click', onModelClick);
+
+// Добавляем обработчик касания для мобильных устройств
+document.getElementById('model-container').addEventListener('touchend', onModelTouch);
