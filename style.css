@@ -1,0 +1,150 @@
+@font-face {
+    font-family: 'andalemono';
+    src: url('andalemono.ttf') format('truetype');
+}
+
+body {
+    font-family: 'andalemono', sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    text-transform: uppercase;
+    margin: 0;
+    padding: 10px 30px;
+    box-sizing: border-box;
+    background-color: #ffffff;
+    color: #000000;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: flex-start;
+    overflow: hidden;
+    position: relative;
+}
+
+.model-container {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+}
+
+.text-container {
+    width: 450px;
+    text-align: left;
+    box-sizing: border-box;
+    z-index: 2;
+    position: relative;
+    pointer-events: auto;
+}
+
+.files {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 0;
+}
+
+.slide {
+    display: none;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    height: 100%;
+    position: relative; /* Добавлено для позиционирования текста */
+}
+
+.slide.active {
+    display: flex;
+}
+
+
+.picture {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: filter 0.3s ease, opacity 0.3s ease; /* Плавный переход для фильтра и прозрачности */
+}
+
+.picture.lazy {
+    filter: blur(20px); /* Размытие изображения */
+    opacity: 0.5; /* Полупрозрачность для размытого изображения */
+}
+
+.picture.lazy-loaded {
+    filter: blur(0); /* Убираем размытие */
+    opacity: 1; /* Полная видимость после загрузки */
+}
+
+.slide-text {
+    position: absolute;
+    top: 10px; /* Положение текста относительно верхней части слайда */
+    left: 30px; /* Положение текста относительно левой части слайда */
+    font-family: 'andalemono', sans-serif;
+    font-size: 14px;
+    line-height: 22px;
+    text-transform: uppercase;
+    color: inherit; /* Наследуем цвет текста */
+    z-index: 1; /* Устанавливаем z-index выше изображения */
+}
+
+.hidden {
+    display: none;
+}
+
+.instagram-link {
+    text-decoration: none;
+    color: inherit;
+}
+
+.instagram-link:hover {
+    text-decoration: underline;
+}
+
+.no-link {
+    text-decoration: none;
+    color: inherit;
+    cursor: text;
+}
+
+@media (max-width: 480px) and (orientation: portrait) {
+    .text-container {
+        width: auto;
+    }
+
+    .slide-text {
+        width: 300px;
+    }
+}
+
+
+#slider:hover::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: 50%; /* Занимаем левую половину слайдера */
+    cursor: w-resize; /* Курсор влево */
+    z-index: 1; /* Убедитесь, что псевдоэлементы находятся выше слайдов */
+}
+
+#slider:hover::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: 50%; /* Занимаем правую половину слайдера */
+    cursor: e-resize; /* Курсор вправо */
+    z-index: 1; /* Убедитесь, что псевдоэлементы находятся выше слайдов */
+}
