@@ -206,15 +206,17 @@ function toggleModelState() {
         textContainer.classList.remove('hidden');
         slider.classList.add('hidden');
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); // Устанавливаем белый цвет статус-бара
+        document.body.style.backgroundColor = '#ffffff'; // Устанавливаем белый цвет фона
         isModelMinimized = false;
     } else {
         // Уменьшаем и перемещаем модель вниз экрана
-        gsap.to(model.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0.6 }); // Делаем модель меньше
-        gsap.to(model.position, { x: 0, y: -0.95, z: 0, duration: 0.6 }); // Опускаем модель вниз
+        gsap.to(model.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.6 }); // Делаем модель меньше
+        gsap.to(model.position, { x: 0, y: -1, z: 0, duration: 0.6 }); // Опускаем модель вниз
         textContainer.classList.add('hidden');
         slider.classList.remove('hidden');
         const backgroundColor = slides[currentSlide].getAttribute('data-bg-color');
         document.querySelector('meta[name="theme-color"]').setAttribute('content', backgroundColor); // Устанавливаем цвет статус-бара по текущему слайду
+        document.body.style.backgroundColor = backgroundColor; // Устанавливаем цвет фона по текущему слайду
         isModelMinimized = true;
     }
     console.log(`Model minimized: ${isModelMinimized}`);
@@ -231,12 +233,14 @@ function showSlide(index) {
     }
     slides[index].classList.add('active');
 
-    // Устанавливаем цвет фона для статус-бара
+    // Устанавливаем цвет фона для статус-бара и body
     const backgroundColor = slides[index].getAttribute('data-bg-color');
     if (backgroundColor) {
         document.querySelector('meta[name="theme-color"]').setAttribute('content', backgroundColor);
+        document.body.style.backgroundColor = backgroundColor; // Устанавливаем цвет фона для body
     } else {
         document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); // Устанавливаем цвет по умолчанию
+        document.body.style.backgroundColor = '#ffffff'; // Устанавливаем цвет фона по умолчанию
     }
 }
 
@@ -255,15 +259,11 @@ slider.addEventListener('click', function(event) {
     }
     showSlide(currentSlide);
 });
-
 // Initial setting of the bottom padding
 setBottomPadding();
-
 // Update the bottom padding on resize
 window.addEventListener('resize', setBottomPadding);
-
 // Добавляем обработчик клика на контейнер модели
 document.getElementById('model-container').addEventListener('click', onModelClick);
-
 // Добавляем обработчик касания для мобильных устройств
 document.getElementById('model-container').addEventListener('touchend', onModelTouch);
