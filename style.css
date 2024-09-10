@@ -75,6 +75,7 @@ body {
     transition: filter 0.3s ease, opacity 0.3s ease; /* Плавный переход для фильтра и прозрачности */
 }
 
+
 .picture.lazy {
     filter: blur(20px); /* Размытие изображения */
     opacity: 0.5; /* Полупрозрачность для размытого изображения */
@@ -84,6 +85,22 @@ body {
     filter: blur(0); /* Убираем размытие */
     opacity: 1; /* Полная видимость после загрузки */
 }
+
+
+/* Стили для фиксированного положения контента по вертикали на десктопе */
+.slide.fixed-vertical .picture {
+    object-fit: contain;
+    max-height: 100%;
+    max-width: 100%;
+}
+
+
+
+
+
+
+
+
 
 .slide-text {
     position: absolute;
