@@ -1,17 +1,18 @@
 // Basic setup for Three.js
 const scene = new THREE.Scene();
-const camera = new THREE.PerspectiveCamera(35, window.innerWidth / window.innerHeight, 0.1, 1000); // Уменьшенное поле зрения
-const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true }); // alpha: true для прозрачного фона
+const camera = new THREE.PerspectiveCamera(14, window.innerWidth / window.innerHeight, 0.1, 1000);
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
 renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.outputEncoding = THREE.sRGBEncoding; // Корректная обработка цветов
+renderer.physicallyCorrectLights = true; // Физически корректное освещение
 document.getElementById('model-container').appendChild(renderer.domElement);
 
-let model; // Переменная для хранения модели
-let isModelMinimized = false; // Флаг для отслеживания состояния модели
+let model;
+let isModelMinimized = false;
 
 // Lazy loading images with blur-up effect
 document.addEventListener('DOMContentLoaded', () => {
     const lazyImages = document.querySelectorAll('.lazy');
-
     lazyImages.forEach(image => {
         image.addEventListener('load', () => {
             image.classList.add('lazy-loaded');
@@ -21,14 +22,16 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Load the 3D model
 const loader = new THREE.GLTFLoader();
-loader.load('golova.glb', function (gltf) {
+loader.load('golova_model.glb', function (gltf) {
+    if (model) {
+        scene.remove(model); // Удаляем старую модель
+    }
     model = gltf.scene;
-    updateModelScale(); // Устанавливаем начальный масштаб модели
+    updateModelScale();
     scene.add(model);
     animate();
     console.log("Model loaded");
 
-    // Добавляем обработчик клика на контейнер модели
     document.getElementById('model-container').addEventListener('click', onModelClick);
     document.getElementById('model-container').addEventListener('touchend', onModelTouch);
 }, undefined, function (error) {
@@ -36,20 +39,30 @@ loader.load('golova.glb', function (gltf) {
 });
 
 // Lighting
-const ambientLight = new THREE.AmbientLight(0x404040, 1); // Soft white light
+const ambientLight = new THREE.AmbientLight(0x404040, 6); // Уменьшенная интенсивность
 scene.add(ambientLight);
 
-const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+
+const pointLight1 = new THREE.PointLight(0xFFD5AE, 10, 100); // цвет, интенсивность, дальность
+pointLight1.position.set(5, 10, 5); // Устанавливаем позицию света
+scene.add(pointLight1);
+
+// const pointLight2 = new THREE.PointLight(0xFFE0B7, 50, 1); // цвет, интенсивность, дальность
+// pointLight2.position.set(1, 1, 1); // Устанавливаем позицию света
+// scene.add(pointLight2);
+
+
+const directionalLight = new THREE.DirectionalLight(0xffffff, 1); // Уменьшенная интенсивность
 directionalLight.position.set(0, 1, 1).normalize();
 scene.add(directionalLight);
 
-camera.position.z = 4; // Уменьшаем значение для приближения камеры
+camera.position.z = 10;
 
 function animate() {
     requestAnimationFrame(animate);
     if (model) {
-        model.rotation.y += (targetRotationY - model.rotation.y) * smoothFactor; // Плавная анимация поворота по Y
-        model.rotation.x += (targetRotationX - model.rotation.x) * smoothFactor; // Плавная анимация поворота по X
+        model.rotation.y += (targetRotationY - model.rotation.y) * smoothFactor;
+        model.rotation.x += (targetRotationX - model.rotation.x) * smoothFactor;
     }
     renderer.render(scene, camera);
 }
@@ -60,15 +73,15 @@ let lastTouchX = 0;
 let lastTouchY = 0;
 let targetRotationX = 0;
 let targetRotationY = 0;
-const rotationSpeed = 0.002; // Уменьшенная скорость вращения для мобильных устройств
-const smoothFactor = 0.1; // Коэффициент плавности
+const rotationSpeed = 0.002;
+const smoothFactor = 0.1;
 
 // Rotate model based on mouse movement (desktop)
 document.addEventListener('mousemove', (event) => {
     const x = (event.clientX / window.innerWidth) * 2 - 1;
     const y = (event.clientY / window.innerHeight) * 2 - 1;
-    targetRotationY = x * 0.2; // Коэффициент для активного поворота на компьютере
-    targetRotationX = y * 0.2; // Коэффициент для активного поворота на компьютере
+    targetRotationY = x * 0.2;
+    targetRotationX = y * 0.2;
     console.log(`Mouse move: x=${x}, y=${y}`);
 });
 
@@ -85,8 +98,8 @@ document.addEventListener('touchmove', (event) => {
         const touchY = event.touches[0].clientY;
         const deltaX = touchX - lastTouchX;
         const deltaY = touchY - lastTouchY;
-        targetRotationY += deltaX * rotationSpeed; // Уменьшенная скорость вращения для мобильных устройств
-        targetRotationX += deltaY * rotationSpeed; // Уменьшенная скорость вращения для мобильных устройств
+        targetRotationY += deltaX * rotationSpeed;
+        targetRotationX += deltaY * rotationSpeed;
         lastTouchX = touchX;
         lastTouchY = touchY;
     }
@@ -97,20 +110,10 @@ document.addEventListener('touchend', (event) => {
     if (event.changedTouches.length > 0) {
         const touchX = event.changedTouches[0].clientX;
         const touchY = event.changedTouches[0].clientY;
-        targetRotationY = (touchX / window.innerWidth - 0.5) * Math.PI * 0.12; // Уменьшенный коэффициент для менее активного поворота на мобильных устройствах
-        targetRotationX = (touchY / window.innerHeight - 0.5) * Math.PI * 0.12; // Уменьшенный коэффициент для менее активного поворота на мобильных устройствах
+        targetRotationY = (touchX / window.innerWidth - 0.5) * Math.PI * 0.12;
+        targetRotationX = (touchY / window.innerHeight - 0.5) * Math.PI * 0.12;
     }
 });
-
-// Smooth rotation animation
-function animate() {
-    requestAnimationFrame(animate);
-    if (model) {
-        model.rotation.y += (targetRotationY - model.rotation.y) * smoothFactor; // Плавная анимация поворота по Y
-        model.rotation.x += (targetRotationX - model.rotation.x) * smoothFactor; // Плавная анимация поворота по X
-    }
-    renderer.render(scene, camera);
-}
 
 // Handle window resize
 window.addEventListener('resize', () => {
@@ -119,11 +122,11 @@ window.addEventListener('resize', () => {
     renderer.setSize(width, height);
     camera.aspect = width / height;
     camera.updateProjectionMatrix();
-    updateModelScale(); // Обновляем масштаб модели при изменении размера окна
-    setVh(); // Обновляем переменную vh при изменении размера окна
+    updateModelScale();
+    setVh();
     if (isModelMinimized) {
         gsap.to(model.scale, { x: 1.5, y: 1.5, z: 1.5, duration: 0 });
-        gsap.to(model.position, { x: 0, y: -0.95, z: 0, duration: 0 }); // Опускаем модель вниз
+        gsap.to(model.position, { x: 0, y: -0.95, z: 0, duration: 0 });
     }
     console.log("Window resized");
 });
@@ -131,11 +134,11 @@ window.addEventListener('resize', () => {
 function updateModelScale() {
     if (model) {
         if (window.innerWidth <= 768) {
-            model.scale.set(4, 4, 4); // Увеличиваем масштаб модели для мобильных устройств
-            model.position.set(0, -0.5, 0); // Опускаем модель чуть ниже для мобильных устройств
+            model.scale.set(4, 4, 4);
+            model.position.set(0, -0.5, 0);
         } else {
-            model.scale.set(5, 5, 5); // Увеличиваем масштаб модели для десктопов
-            model.position.set(0, 0, 0); // Позиция для десктопов
+            model.scale.set(5, 5, 5);
+            model.position.set(0, 0, 0);
         }
         console.log("Model scale updated");
     } else {
@@ -170,16 +173,14 @@ function onDocumentMouseDown(event) {
 
     const intersects = raycaster.intersectObjects(scene.children, true);
 
-    console.log('Intersects:', intersects); // Debug log
+    console.log('Intersects:', intersects);
 
     if (intersects.length > 0) {
         const firstIntersectedObject = intersects[0].object;
-        console.log('First intersected object:', firstIntersectedObject); // Debug log
-        // Упростим проверку, чтобы убедиться, что клик по модели обрабатывается
-        if (firstIntersectedObject.name === 'Data_GEO_ellie_head_002') {
-            // Обработка клика по модели
+        console.log('First intersected object:', firstIntersectedObject);
+        if (firstIntersectedObject.name === 'head002') {
             toggleModelState();
-            return; // Прекращаем дальнейшую обработку события
+            return;
         }
     }
 }
@@ -191,32 +192,30 @@ function toggleModelState() {
     const slider = document.getElementById('slider');
 
     if (isModelMinimized) {
-        // Возвращаем модель в исходное состояние
         if (window.innerWidth <= 768) {
-            gsap.to(model.scale, { x: 4, y: 4, z: 4, duration: 0.6 }); // Возвращаем масштаб для мобильных устройств
-            gsap.to(model.position, { x: 0, y: -0.5, z: 0, duration: 0.6 }); // Возвращаем позицию для мобильных устройств
-            gsap.to(model.rotation, { x: 0, duration: 0.6 }); // Возвращаем поворот модели
-            targetRotationX = 0; // Сбрасываем поворот по X
-            targetRotationY = 0; // Сбрасываем поворот по Y
+            gsap.to(model.scale, { x: 4, y: 4, z: 4, duration: 0.6 });
+            gsap.to(model.position, { x: 0, y: -0.5, z: 0, duration: 0.6 });
+            gsap.to(model.rotation, { x: 0, duration: 0.6 });
+            targetRotationX = 0;
+            targetRotationY = 0;
         } else {
-            gsap.to(model.scale, { x: 5, y: 5, z: 5, duration: 0.6 }); // Возвращаем масштаб для десктопов
-            gsap.to(model.position, { x: 0, y: 0, z: 0, duration: 0.6 }); // Возвращаем позицию для десктопов
-            gsap.to(model.rotation, { x: 0, duration: 0.6 }); // Возвращаем поворот модели
+            gsap.to(model.scale, { x: 5, y: 5, z: 5, duration: 0.6 });
+            gsap.to(model.position, { x: 0, y: 0, z: 0, duration: 0.6 });
+            gsap.to(model.rotation, { x: 0, duration: 0.6 });
         }
         textContainer.classList.remove('hidden');
         slider.classList.add('hidden');
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); // Устанавливаем белый цвет статус-бара
-        document.body.style.backgroundColor = '#ffffff'; // Устанавливаем белый цвет фона
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff');
+        document.body.style.backgroundColor = '#ffffff';
         isModelMinimized = false;
     } else {
-        // Уменьшаем и перемещаем модель вниз экрана
-        gsap.to(model.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.6 }); // Делаем модель меньше
-        gsap.to(model.position, { x: 0, y: -1, z: 0, duration: 0.6 }); // Опускаем модель вниз
+        gsap.to(model.scale, { x: 1.3, y: 1.3, z: 1.3, duration: 0.6 });
+        gsap.to(model.position, { x: 0, y: -1, z: 0, duration: 0.6 });
         textContainer.classList.add('hidden');
         slider.classList.remove('hidden');
         const backgroundColor = slides[currentSlide].getAttribute('data-bg-color');
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', backgroundColor); // Устанавливаем цвет статус-бара по текущему слайду
-        document.body.style.backgroundColor = backgroundColor; // Устанавливаем цвет фона по текущему слайду
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', backgroundColor);
+        document.body.style.backgroundColor = backgroundColor;
         isModelMinimized = true;
     }
     console.log(`Model minimized: ${isModelMinimized}`);
@@ -233,14 +232,13 @@ function showSlide(index) {
     }
     slides[index].classList.add('active');
 
-    // Устанавливаем цвет фона для статус-бара и body
     const backgroundColor = slides[index].getAttribute('data-bg-color');
     if (backgroundColor) {
         document.querySelector('meta[name="theme-color"]').setAttribute('content', backgroundColor);
-        document.body.style.backgroundColor = backgroundColor; // Устанавливаем цвет фона для body
+        document.body.style.backgroundColor = backgroundColor;
     } else {
-        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff'); // Устанавливаем цвет по умолчанию
-        document.body.style.backgroundColor = '#ffffff'; // Устанавливаем цвет фона по умолчанию
+        document.querySelector('meta[name="theme-color"]').setAttribute('content', '#ffffff');
+        document.body.style.backgroundColor = '#ffffff';
     }
 }
 
@@ -251,14 +249,14 @@ slider.addEventListener('click', function(event) {
     const clickX = event.clientX - rect.left;
 
     if (clickX < rect.width / 2) {
-        // Clicked on the left side, go to previous slide
         currentSlide = (currentSlide === 0) ? slides.length - 1 : currentSlide - 1;
     } else {
-        // Clicked on the right side, go to next slide
         currentSlide = (currentSlide === slides.length - 1) ? 0 : currentSlide + 1;
     }
     showSlide(currentSlide);
 });
+
+
 // Initial setting of the bottom padding
 setBottomPadding();
 // Update the bottom padding on resize
