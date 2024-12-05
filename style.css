@@ -3,6 +3,11 @@
     src: url('andalemono.ttf') format('truetype');
 }
 
+@font-face {
+    font-family: 'Daniel-Black';
+    src: url('Daniel-Black.otf') format('opentype');
+}
+
 body {
     font-family: 'andalemono', sans-serif;
     font-size: 14px;
@@ -103,6 +108,7 @@ body {
 
 
 .slide-text {
+    width: 400px;
     position: absolute;
     top: 10px; /* Положение текста относительно верхней части слайда */
     left: 30px; /* Положение текста относительно левой части слайда */
@@ -144,6 +150,55 @@ body {
 }
 
 
+
+
+
+
+
+.text-slide.naming {
+    font-family: 'Daniel-Black', sans-serif; /* Новый шрифт */
+    font-size: 48px; /* Новый размер шрифта */
+    line-height: 1.2;
+    color: inherit; /* Наследуем цвет текста */
+    text-align: center; /* Центрируем текст */
+    margin-top: 20px; /* Отступ сверху для разделения блоков */
+    text-transform: none; /* Убираем преобразование в верхний регистр */
+    transform: rotate(-5deg); /* Наклон текста на 5 градусов */
+    width: 100%; /* Убедитесь, что элемент занимает всю ширину */
+}
+
+.text-slide.narrative {
+    font-family: 'Daniel-Black', sans-serif; /* Новый шрифт */
+    font-size: 48px; /* Новый размер шрифта */
+    line-height: 1.2;
+    color: inherit; /* Наследуем цвет текста */
+    text-align: left; /* Выравнивание текста по левому краю */
+    margin-top: 20px; /* Отступ сверху для разделения блоков */
+    text-transform: none; /* Убираем преобразование в верхний регистр */
+    transform: rotate(-5deg); /* Наклон текста на 5 градусов */
+    width: 90%; /* Устанавливаем ширину блока */
+    margin: 0 auto; /* Центрируем блок по горизонтали */
+}
+
+@media (max-width: 480px) {
+    .text-slide.naming,
+    .text-slide.narrative {
+        font-size: 32px; /* Новый размер шрифта для мобильных устройств */
+        width: 87%; /* Устанавливаем ширину блока */
+    }
+}
+
+.custom-link {
+    color: inherit; /* Наследуем цвет текста от родительского элемента */
+    text-decoration: underline; /* Подчеркивание текста */
+}
+
+
+
+
+
+
+
 #slider:hover::before {
     content: '';
     position: absolute;
@@ -165,3 +220,6 @@ body {
     cursor: e-resize; /* Курсор вправо */
     z-index: 1; /* Убедитесь, что псевдоэлементы находятся выше слайдов */
 }
+
+
+
