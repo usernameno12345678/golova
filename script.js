@@ -226,6 +226,18 @@ const slider = document.getElementById('slider');
 const slides = slider.getElementsByClassName('slide');
 let currentSlide = 0;
 
+// Функция для перемешивания массива
+function shuffleArray(array) {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        // Меняем элементы местами
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+    return array;
+}
+
 function showSlide(index) {
     for (let i = 0; i < slides.length; i++) {
         slides[i].classList.remove('active');
@@ -241,6 +253,21 @@ function showSlide(index) {
         document.body.style.backgroundColor = '#ffffff';
     }
 }
+
+// Укажите индекс первого слайда, который должен оставаться на месте
+const firstSlideIndex = 0; // Измените на нужный индекс, если необходимо
+const firstSlide = slides[firstSlideIndex];
+
+// Перемешиваем остальные слайды
+const slidesArray = Array.from(slides).filter((_, index) => index !== firstSlideIndex); // Исключаем первый слайд
+shuffleArray(slidesArray); // Перемешиваем массив
+
+// Переставляем слайды в DOM в случайном порядке, добавляя первый слайд в начало
+slider.innerHTML = ''; // Очищаем контейнер
+slider.appendChild(firstSlide); // Добавляем первый слайд
+slidesArray.forEach(slide => {
+    slider.appendChild(slide); // Перемещаем каждый оставшийся слайд в конец контейнера
+});
 
 showSlide(currentSlide);
 
