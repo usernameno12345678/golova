@@ -64,34 +64,33 @@ body {
     align-items: center;
     width: 100%;
     height: 100%;
-    position: relative; /* Добавлено для позиционирования текста */
+    position: relative;
+    will-change: transform, opacity; /* Подготовка к изменениям */
+    transition: opacity 0.3s ease, transform 0.3s ease; /* Плавный переход */
 }
 
 .slide.active {
     display: flex;
+    opacity: 1;
+    transform: scale(1);
 }
 
-
 .picture {
-    display: block;
     width: 100%;
     height: 100%;
     object-fit: cover;
-/*     transition: filter 0.3s ease, opacity 0.3s ease; /* Плавный переход для фильтра и прозрачности */ 
+    transition: filter 0.3s ease, opacity 0.3s ease;
 }
 
-
 .picture.lazy {
-    filter: blur(20px); /* Размытие изображения */
-    opacity: 0.5; /* Полупрозрачность для размытого изображения */
+    filter: blur(20px);
+    opacity: 0.5;
 }
 
 .picture.lazy-loaded {
-    filter: blur(0); /* Убираем размытие */
-    opacity: 1; /* Полная видимость после загрузки */
+    filter: blur(0);
+    opacity: 1;
 }
-
-
 /* Стили для фиксированного положения контента по вертикали на десктопе */
 .slide.fixed-vertical .picture {
     object-fit: contain;
@@ -157,7 +156,7 @@ body {
 
 .text-slide.naming {
     font-family: 'Daniel-Black', sans-serif; /* Новый шрифт */
-    font-size: 48px; /* Новый размер шрифта */
+    font-size: 96px; /* Новый размер шрифта */
     line-height: 1.2;
     color: inherit; /* Наследуем цвет текста */
     text-align: center; /* Центрируем текст */
@@ -169,7 +168,7 @@ body {
 
 .text-slide.narrative {
     font-family: 'Daniel-Black', sans-serif; /* Новый шрифт */
-    font-size: 48px; /* Новый размер шрифта */
+    font-size: 96px; /* Новый размер шрифта */
     line-height: 1.2;
     color: inherit; /* Наследуем цвет текста */
     text-align: left; /* Выравнивание текста по левому краю */
@@ -180,7 +179,7 @@ body {
     margin: 0 auto; /* Центрируем блок по горизонтали */
 }
 
-@media (max-width: 480px) {
+@media (max-width: 800px) {
     .text-slide.naming,
     .text-slide.narrative {
         font-size: 32px; /* Новый размер шрифта для мобильных устройств */
