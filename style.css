@@ -1,16 +1,17 @@
 @font-face {
     font-family: 'andalemono';
     src: url('andalemono.ttf') format('truetype');
+    font-display: swap;
+
 }
 
 @font-face {
     font-family: 'Daniel-Black';
     src: url('Daniel-Black.otf') format('opentype');
-    font-display: swap;
 }
 
 body {
-    font-family: 'andalemono', sans-serif;
+    font-family: 'andalemono', 'Courier New', monospace;
     font-size: 14px;
     line-height: 22px;
     text-transform: uppercase;
